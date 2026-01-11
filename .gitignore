@@ -1,3 +1,5 @@
+TODO
+*.mine
 # --- 1. Python Internals ---
 __pycache__/
 *.py[cod]
@@ -20,6 +22,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
 
 # --- 2. Modern Tooling (uv, ruff, mypy) ---
 # uv: Ignore the virtual environment, but COMMIT uv.lock (for apps)
