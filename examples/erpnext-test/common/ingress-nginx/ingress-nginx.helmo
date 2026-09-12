@@ -1,0 +1,8 @@
+TEST_CONTEXT=colima-helmo-test
+PROD_CONTEXT=replace-with-your-prod-context
+CHART_VERSION=4.14.1
+APP_VERSION=1.14.1
+REPO_URL=https://kubernetes.github.io/ingress-nginx
+REPOSITORY_NAME=ingress-nginx
+CHART_NAME=ingress-nginx
+NAMESPACE=ingress-nginx

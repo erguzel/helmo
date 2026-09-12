@@ -1,0 +1,8 @@
+TEST_CONTEXT=colima-helmo-test
+PROD_CONTEXT=replace-with-your-prod-context
+CHART_VERSION=5.4.0
+APP_VERSION=RELEASE.2024-12-18T13-15-44Z
+REPO_URL=https://charts.min.io/
+REPOSITORY_NAME=minio
+CHART_NAME=minio
+NAMESPACE=minio

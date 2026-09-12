@@ -1,0 +1,8 @@
+TEST_CONTEXT=colima-helmo-test
+PROD_CONTEXT=replace-with-your-prod-context
+CHART_VERSION=6.49.0
+APP_VERSION=3.6.3
+REPO_URL=https://grafana.github.io/helm-charts
+REPOSITORY_NAME=grafana
+CHART_NAME=loki
+NAMESPACE=loki

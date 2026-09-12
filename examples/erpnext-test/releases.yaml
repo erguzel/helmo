@@ -1,0 +1,88 @@
+# Serial deployment set for the erpnext-test stack.
+# Release names are the .helmo file stems; pass the ones you want as
+# arguments, e.g. `helmo serial install -f releases.yaml cert-manager valkey`.
+releases:
+  - initFile: maintenance/cert-manager/cert-manager.helmo
+    environment: test
+    secretFileNames:
+      - secret-cloudflare-allzone-api-token.env
+    resourceManifestNames:
+      - clusterissuer-letsencrypt-prod.yaml
+      - clusterissuer-letsencrypt-staging.yaml
+      - clusterissuer-local.yaml
+
+  - initFile: common/ingress-nginx/ingress-nginx.helmo
+    environment: test
+    secretFileNames: []
+    resourceManifestNames: []
+
+  - initFile: common/longhorn-system/longhorn-system.helmo
+    environment: test
+    secretFileNames:
+      - secret-longhorn-minio.env
+    resourceManifestNames: []
+
+  - initFile: maintenance/minio/minio.helmo
+    environment: test
+    secretFileNames:
+      - secret-admin-minio.env
+      - secret-admin-tenant-a.env
+      - secret-admin-tenant-b.env
+      - secret-loki-user.env
+      - secret-netshare-user1.env
+      - secret-netshare-user2.env
+      - secret-mariadb-backup-user.env
+      - secret-registry-user.env
+    resourceManifestNames: []
+
+  - initFile: common/valkey/valkey.helmo
+    environment: test
+    secretFileNames: []
+    resourceManifestNames: []
+
+  - initFile: maintenance/loki/loki.helmo
+    environment: test
+    secretFileNames:
+      - secret-loki-objectstore.env
+    resourceManifestNames: []
+
+  - initFile: common/fluent-bit/fluent-bit.helmo
+    environment: test
+    secretFileNames: []
+    resourceManifestNames: []
+
+  - initFile: maintenance/kube-prometheus-stack/kube-prometheus-stack.helmo
+    environment: test
+    secretFileNames:
+      - secret-grafana-ui.env
+    resourceManifestNames: []
+
+  - initFile: mariadb/mariadb-operator-crds/mariadb-operator-crds.helmo
+    environment: test
+    secretFileNames: []
+    resourceManifestNames: []
+
+  - initFile: mariadb/mariadb-operator/mariadb-operator.helmo
+    environment: test
+    secretFileNames: []
+    resourceManifestNames: []
+
+  - initFile: mariadb/mariadb-cluster/mariadb-cluster.helmo
+    environment: test
+    secretFileNames:
+      - secret-mariadb-root.env
+      - secret-erpnext-admin.env
+      - secret-backup-access.env
+    resourceManifestNames: []
+
+  - initFile: maintenance/registry/registry.helmo
+    environment: test
+    secretFileNames:
+      - secret-registry-minio.env
+    resourceManifestNames: []
+
+  - initFile: erpnext/erpnext.helmo
+    environment: test
+    secretFileNames:
+      - secret-erpnext.env
+    resourceManifestNames: []

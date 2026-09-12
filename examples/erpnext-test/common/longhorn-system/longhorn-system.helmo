@@ -1,0 +1,8 @@
+TEST_CONTEXT=colima-helmo-test
+PROD_CONTEXT=replace-with-your-prod-context
+CHART_VERSION=1.10.1
+APP_VERSION=v1.10.1
+REPO_URL=https://charts.longhorn.io
+REPOSITORY_NAME=longhorn
+CHART_NAME=longhorn
+NAMESPACE=longhorn-system

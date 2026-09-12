@@ -1,0 +1,8 @@
+TEST_CONTEXT=colima-helmo-test
+PROD_CONTEXT=replace-with-your-prod-context
+CHART_VERSION=3.0.0
+APP_VERSION=3.0.0
+REPO_URL=https://twuni.github.io/docker-registry.helm
+REPOSITORY_NAME=twuni
+CHART_NAME=docker-registry
+NAMESPACE=registry
