@@ -14,9 +14,12 @@ import pytest
 
 from helmo.validate import HelmoRuntimeError
 
-#: Contexts an integration test is permitted to talk to.  A throwaway k3d
-#: cluster only -- never a context that might be a real environment.
-SANDBOX_CONTEXTS = frozenset({"k3d-helmo-test"})
+#: Contexts an integration test is permitted to talk to.  The naming
+#: convention is <tool>-helmo-test, which only a cluster created for this
+#: suite carries -- never a context that might be a real environment.
+SANDBOX_CONTEXTS = frozenset(
+    {"colima-helmo-test", "k3d-helmo-test", "kind-helmo-test"}
+)
 
 
 def pytest_configure(config):
@@ -88,7 +91,7 @@ def recorder():
 
 
 HELMO_FILE_TEMPLATE = """\
-TEST_CONTEXT=k3d-helmo-test
+TEST_CONTEXT=colima-helmo-test
 PROD_CONTEXT=k3d-helmo-prod
 CHART_VERSION=v1.19.2
 APP_VERSION=v1.19.2
