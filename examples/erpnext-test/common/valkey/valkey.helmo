@@ -1,0 +1,8 @@
+TEST_CONTEXT=colima-helmo-test
+PROD_CONTEXT=replace-with-your-prod-context
+CHART_VERSION=0.9.2
+APP_VERSION=9.0.1
+REPO_URL=https://valkey-io.github.io/valkey-helm/
+REPOSITORY_NAME=valkey
+CHART_NAME=valkey
+NAMESPACE=valkey

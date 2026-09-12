@@ -1,0 +1,8 @@
+TEST_CONTEXT=colima-helmo-test
+PROD_CONTEXT=replace-with-your-prod-context
+CHART_VERSION=8.0.11
+APP_VERSION=v15.93.1
+REPO_URL=https://helm.erpnext.com
+REPOSITORY_NAME=frappe
+CHART_NAME=erpnext
+NAMESPACE=erpnext

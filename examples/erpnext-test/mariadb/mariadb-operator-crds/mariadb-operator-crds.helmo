@@ -1,0 +1,8 @@
+TEST_CONTEXT=colima-helmo-test
+PROD_CONTEXT=replace-with-your-prod-context
+CHART_VERSION=25.10.2
+APP_VERSION=25.10.2
+REPO_URL=https://helm.mariadb.com/mariadb-operator
+REPOSITORY_NAME=mariadb-operator
+CHART_NAME=mariadb-operator-crds
+NAMESPACE=mariadb-operator-crds

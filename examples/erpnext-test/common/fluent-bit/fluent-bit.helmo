@@ -1,0 +1,8 @@
+TEST_CONTEXT=colima-helmo-test
+PROD_CONTEXT=replace-with-your-prod-context
+CHART_VERSION=0.54.0
+APP_VERSION=4.1.0
+REPO_URL=https://fluent.github.io/helm-charts
+REPOSITORY_NAME=fluent
+CHART_NAME=fluent-bit
+NAMESPACE=fluent-bit
