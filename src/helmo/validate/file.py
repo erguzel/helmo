@@ -36,7 +36,7 @@ def load_validated_netrc(path: str = "~/.netrc"):
         return validated_entries
 
     except (netrc.NetrcParseError, FileNotFoundError) as e:
-        e.add_note(f"Netrc file {path} does not exists or not in correct format. Inspect file and retry.")
+        e.add_note(f"Netrc file {path} does not exist or not in correct format. Inspect file and retry.")
         raise e from e
 
 def docker_auth_config_format_validate(json_content:RegistryAuthConfigModel):

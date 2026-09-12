@@ -13,13 +13,13 @@ def file_exists(file : str | Path,ensure = False):
     
     :param file: Path File path.
     :type file: str | 
-    :param ensure: Throws FileNotFound exception if file does not exists.
+    :param ensure: Throws FileNotFound exception if file does not exist.
     """
     file_path = path_resolver(file)
     file_present = file_path.is_file()
     if not file_present:
         if ensure:
-            raise HelmoPathError(f"File {file} does not exists.")
+            raise HelmoPathError(f"File {file} does not exist.")
         return False
     return True
 
@@ -27,8 +27,8 @@ def file_exists(file : str | Path,ensure = False):
 def ensure_file(file : str | Path, *allowed_suffixes)->Path:
     """
     Returns ensured file. 
-    Throws Value error if sufix is bad/
-    Throws FileNotFound error if file does not exists.
+    Throws ValueError if the suffix is not allowed.
+    Throws FileNotFound error if file does not exist.
     
     :param file: Path File path.
     :type file: str | 
@@ -38,7 +38,7 @@ def ensure_file(file : str | Path, *allowed_suffixes)->Path:
     if allowed_suffixes:
         suffix_exists(file_path,*allowed_suffixes,ensure=True)
     if not file_present:
-        raise HelmoPathError(f"File {file} does not exists.")
+        raise HelmoPathError(f"File {file} does not exist.")
     return file_path
 #
 
@@ -52,13 +52,13 @@ def directory_exists(path: str|Path, ensure = False):
     
     :param path: Directory path.
     :type path: str | Path
-    :param ensure: Throws NotADirectoryError exception if Directory does not exists.
+    :param ensure: Throws NotADirectoryError exception if Directory does not exist.
     """
     path = path_resolver(path)
     directory_present = path.is_dir()
     if not directory_present:
         if ensure:
-            raise HelmoPathError(f"Directory {path} does not exists.")
+            raise HelmoPathError(f"Directory {path} does not exist.")
         return False
     return True
     

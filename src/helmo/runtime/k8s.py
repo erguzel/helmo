@@ -39,9 +39,9 @@ def switch_context(context):
 
 def resource_exists(resource_type, resource_name,context='',namespace=''):
     """
-    Ckecks a given resource name exists in given type in kubernetes context of given environment and namespace.
+    Checks whether a given resource name exists in the given type in kubernetes context of given environment and namespace.
     
-    :param resource_type: Type pf resource. Any kubernetes resource type i.e. ingress, clusterissuer etc.
+    :param resource_type: Type of resource. Any kubernetes resource type i.e. ingress, clusterissuer etc.
     :param resource_name: Name of the resource.
     :param environment: Environment prod|test|staging
     :param namespace: Kubernetes namespace.
@@ -107,7 +107,7 @@ def delete_namespace(namespace, context):
                 "kubectl", "delete", "namespace", namespace
             )
         else:
-            logger.warning(f"Namespace {namespace} in context: {context if context else "current"} does not exists")
+            logger.warning(f"Namespace {namespace} in context: {context if context else "current"} does not exist")
   
 
 # endregion k8s
