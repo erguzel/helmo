@@ -17,7 +17,7 @@ def get_app_version():
 
 
 def file_existence_ui_validate(file, message=''):
-    message = message if message else f"File {file} does not exsts."
+    message = message if message else f"File {file} does not exist."
     if not file_exists(file):
         click.secho(f"{Icons.FAILURE} {message}", fg="red", underline=False)
         sys.exit(1)
@@ -43,7 +43,7 @@ def serial_releases_file_ui_validate(releases, message=''):
 class HelpMessages:
     SUFFIX = 'Suffix to version latest values manifests files along with a timestamp.'
     DRYRUN = 'Performs dry run.'
-    YES = 'Confirms all promts.'
+    YES = 'Confirms all prompts.'
     HELM_ACTION = 'install, upgrade and uninstall are helm actions.'
     HELM_VALUES = 'Additional values files to override main chart. Additional yaml files will apply to all given deployments. If there are conflicting fields in additional yamls, consider manual deployment for each release.'
     HELMO_SERIAL_RELEASES_YAML = 'HELMO_SERIAL_RELEASES_YAML file which defines multiple deployments. You do not need to give it if you set environment variable HELMO_SERIAL_RELEASES_YAML to absolute path of the file. Type helmo --defaults to see default file formats.'
@@ -58,7 +58,7 @@ class HelpMessages:
     KUBERNETES_SECRET_OVERRIDE = 'Overrides existing secret if exists.'
     KUBERNETES_SECRET_FILE = 'Secret file.'
     KUBERNETES_SECRET_TITLE = 'Name for the secret.'
-    KUBERNETES_NAMESPACE = 'Namespace for the secret. Creates namespace if does not exists.'
+    KUBERNETES_NAMESPACE = 'Namespace for the secret. Creates the namespace if it does not exist.'
     KUBERNETES_JOB_NAME = 'Name of the job in kubernetes to create new job using it. Job must already exists in desired namespace.'
     KUBERNETES_POD_NAME = 'Name of the pod in kubernetes.'
     KUBERNETES_CONTAINER_NAME = 'Name of the container in the pod.'

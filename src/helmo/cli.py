@@ -61,12 +61,12 @@ def install(helmo_releases_yaml,values,suffix,dryrun,yes,deployments):
     action = 'install'
     ui.serial_releases_file_ui_validate(helmo_releases_yaml,"HELMO_SERIAL_RELEASES_YAML file can not be null or empty. Either give it with -r option or set environment variable 'HELMO_SERIAL_RELEASES_YAML' with the absolute path of the file.")
     ui.file_extensions_ui_validate(helmo_releases_yaml,".yaml",".yml",message=f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} is not in expected format. Expected formats: yaml, .yml")
-    ui.file_existence_ui_validate(helmo_releases_yaml,f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} does not exsts.")
+    ui.file_existence_ui_validate(helmo_releases_yaml,f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} does not exist.")
     ui.deployment_args_ui_validate(deployments,message=f"Paths or files are not accepted as release names {deployments}.")
 
     for file in values:
         ui.file_extensions_ui_validate(file,'.yaml',".yml",message=f"Additional values file {file} is not in expected format. Expected formats: yaml, .yml")
-        ui.file_existence_ui_validate(file,f"Additional values file {file} does not exsts.")
+        ui.file_existence_ui_validate(file,f"Additional values file {file} does not exist.")
 
     if not yes:
         if click.confirm(f"{ui.Icons.WARNING}  Serial helm action requires pre-configuration per deployment. Have you done it already? For more info 'helmo init --help' "):
@@ -103,12 +103,12 @@ def upgrade(helmo_releases_yaml,values,suffix,dryrun,yes,deployments):
     action = 'upgrade'
     ui.serial_releases_file_ui_validate(helmo_releases_yaml,"HELMO_SERIAL_RELEASES_YAML file can not be null or empty. Either give it with -r option or set environment variable 'HELMO_SERIAL_RELEASES_YAML' with the absolute path of the file.")
     ui.file_extensions_ui_validate(helmo_releases_yaml,".yaml",".yml",message=f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} is not in expected format. Expected formats: yaml, .yml")
-    ui.file_existence_ui_validate(helmo_releases_yaml,f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} does not exsts.")
+    ui.file_existence_ui_validate(helmo_releases_yaml,f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} does not exist.")
     ui.deployment_args_ui_validate(deployments,message=f"Paths or files are not accepted as release names {deployments}.")
 
     for file in values:
         ui.file_extensions_ui_validate(file,'.yaml',".yml",message=f"Additional values file {file} is not in expected format. Expected formats: yaml, .yml")
-        ui.file_existence_ui_validate(file,f"Additional values file {file} does not exsts.")
+        ui.file_existence_ui_validate(file,f"Additional values file {file} does not exist.")
 
     if not yes:
         if click.confirm(f"{ui.Icons.WARNING}  Serial helm action requires pre-configuration per deployment. Have you done it already? For more info 'helmo init --help' "):
@@ -144,7 +144,7 @@ def uninstall(helmo_releases_yaml,dryrun,yes,deletenamespace,deployments):
     action = 'uninstall'
     ui.serial_releases_file_ui_validate(helmo_releases_yaml,"HELMO_SERIAL_RELEASES_YAML file can not be null or empty. Either give it with -r option or set environment variable 'HELMO_SERIAL_RELEASES_YAML' with the absolute path of the file.")
     ui.file_extensions_ui_validate(helmo_releases_yaml,".yaml",".yml",message=f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} is not in expected format. Expected formats: yaml, .yml")
-    ui.file_existence_ui_validate(helmo_releases_yaml,f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} does not exsts.")
+    ui.file_existence_ui_validate(helmo_releases_yaml,f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} does not exist.")
     ui.deployment_args_ui_validate(deployments,message=f"Paths or files are not accepted as release names {deployments}.")
     if not yes:
         if click.confirm(f"{ui.Icons.WARNING}  Serial helm action requires pre-configuration per deployment. Have you done it already? For more info 'helmo init --help' "):
@@ -182,10 +182,10 @@ def manual(initfile,env,action,wait,suffix,quiet,yes,dryrun,values):
     A cli.deploy command to manage a single manual deployment.
     """
     ui.file_extensions_ui_validate(initfile,".helmo",message=f"Release file {initfile} is not in expected format. Expected: path/to/file-name.helmo")
-    ui.file_existence_ui_validate(initfile, message=f"Release file {initfile} does not exsts.")
+    ui.file_existence_ui_validate(initfile, message=f"Release file {initfile} does not exist.")
     for file in values:
         ui.file_extensions_ui_validate(file,'.yaml',".yml",message=f"Additional values file {file} is not in expected format. Expected: path/to/file-name.(yaml|yml)")
-        ui.file_existence_ui_validate(file, message=f"Additional values file {file} does not exsts.")
+        ui.file_existence_ui_validate(file, message=f"Additional values file {file} does not exist.")
  
     if env=="prod":
         if not yes:
@@ -218,10 +218,10 @@ def init(init,env,suffix,quiet) TODO: Make env optional current context, add hel
 @click.option('--quiet','-q', is_flag= True, help=ui.HelpMessages.QUIET)
 def init(initfile,env,suffix,quiet):
     """
-    A cli command for initializing release namnespace follder with generated values yaml manifests and versions previous manifests.
+    A cli command for initializing release namespace folder with generated values yaml manifests and versions previous manifests.
     """
     ui.file_extensions_ui_validate(initfile,".helmo",message=f"Release file {initfile} is not in expected format. Expected: path/to/file-name.helmo")
-    ui.file_existence_ui_validate(initfile, f"Release file {initfile} does not exsts.")
+    ui.file_existence_ui_validate(initfile, f"Release file {initfile} does not exist.")
     helm.init_logic(initfile,suffix,env,quiet)
     click.secho(f"{ui.Icons.SUCCESS} Namespace folder ready for {initfile} release.")
 
@@ -237,9 +237,9 @@ def init(initfile,env,suffix,quiet):
 @click.option('--override','-o', is_flag=True, help=ui.HelpMessages.KUBERNETES_SECRET_OVERRIDE)
 def create_file_secret(secrettitle,secretfile,context,namespace,override):
     """
-    A cli.resource command to create s kubernetes secret from file.
+    A cli.resource command to create a kubernetes secret from a file.
     """
-    ui.file_existence_ui_validate(secretfile,f"Secret file {secretfile} does not exsts.")
+    ui.file_existence_ui_validate(secretfile,f"Secret file {secretfile} does not exist.")
     k8s.create_file_secret_logic(secrettitle,secretfile,context,namespace,override)
 
 #endregion CLI COMMANDS
@@ -419,7 +419,7 @@ def delete_all(registryurl,repos,yes):
 )
 def gc_collect(context,namespace,podname,image):
     """
-    Runs garbage collecto of the registry deployment in cluster.
+    Runs garbage collection for the registry deployment in the cluster.
     """
     res = k8s.gc_collect_logic(context, namespace, podname, image)
     logger.info(res)

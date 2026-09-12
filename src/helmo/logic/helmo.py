@@ -76,7 +76,7 @@ def manual_deploy_logic(release_file,
 
     :param chart: .helm file of the chart.
     :param env: Environment prod|staging|test.
-    :param action: Helm action install|ugrade|uninstall.
+    :param action: Helm action install|upgrade|uninstall.
     :param wait: Wait timeout after helm command.
     :param quiet: Skips promopting to user.
     :param values: Additional partial or complete values.yaml files to override original values.yaml manifest of release.
@@ -92,7 +92,7 @@ def manual_deploy_logic(release_file,
     NAMESPACE=INIT_FILE_VARS.NAMESPACE
     chart_values_file= f"{deployment_root}/{release_name}_{environment}_{CHART_VERSION}.yaml"
     if not validate.file_exists(chart_values_file):
-        logger.error(f"Values manifest file {chart_values_file} does not exists. Consider running 'helmo init -i {release_file}' first to generate manifest files to required directories")
+        logger.error(f"Values manifest file {chart_values_file} does not exist. Consider running 'helmo init -i {release_file}' first to generate manifest files to required directories")
         sys.exit(1) 
     
     additional_values_files_cmd=[
@@ -170,7 +170,7 @@ def init_logic(init_file,suffix,env, quiet = False, dryrun=False):
     namespace_path.mkdir(parents=True, exist_ok=True)
     if release_file_permanent != init_file:
         shutil.move(init_file,release_file_permanent)
-        logger.warning(f"Release file {init_file} overrided {release_file_permanent} permenatly.")
+        logger.warning(f"Release file {init_file} permanently overwrote {release_file_permanent}.")
     if not runtime.resource_exists("namespace",NAMESPACE,context):
         runtime.execute_subprocess(
             "kubectl","create", "namespace", NAMESPACE
