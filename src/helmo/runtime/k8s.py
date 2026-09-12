@@ -1,6 +1,5 @@
 
 from helmo.runtime import execute_subprocess
-from helmo.validate import HelmoRuntimeError
 from loguru import logger
 from pathlib import Path
 # region k8
@@ -40,28 +39,35 @@ def switch_context(context):
 def resource_exists(resource_type, resource_name,context='',namespace=''):
     """
     Checks whether a given resource name exists in the given type in kubernetes context of given environment and namespace.
-    
+
+    Absence and failure are different answers. --ignore-not-found turns a
+    missing resource into a zero exit with empty output, which leaves a nonzero
+    exit to mean a real failure -- an unreachable cluster, a rejected
+    credential, an unknown resource type. Those are raised rather than reported
+    as "not there", because reporting them as absence would send the caller on
+    to create namespaces and secrets against a cluster it never reached.
+
     :param resource_type: Type of resource. Any kubernetes resource type i.e. ingress, clusterissuer etc.
     :param resource_name: Name of the resource.
-    :param environment: Environment prod|test|staging
+    :param context: Kubernetes context to switch to before looking.
     :param namespace: Kubernetes namespace.
     """
     if context:
         switch_context(context)
 
-    try:
-        execute_subprocess(
-            "kubectl",
-            "get",
-            resource_type,
-            resource_name,
-            "-n" if namespace else '',
-            namespace if namespace else ''
-        )
-    except HelmoRuntimeError:
-        return False
-    
-    return True
+    cmd_res = execute_subprocess(
+        "kubectl",
+        "get",
+        resource_type,
+        resource_name,
+        "-n" if namespace else '',
+        namespace if namespace else '',
+        "--ignore-not-found",
+        "-o",
+        "name"
+    )
+
+    return bool(cmd_res.stdout.strip())
 
 def create_file_secret(title,secret_file,context='',namespace='',override=False):
     #ensure_file(file)

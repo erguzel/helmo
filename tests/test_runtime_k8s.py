@@ -9,6 +9,7 @@ the only way to test "it did not delete anything" safely.
 import pytest
 
 from helmo.runtime import k8s as runtime_k8s
+from helmo.validate import HelmoRuntimeError
 
 
 @pytest.fixture
@@ -57,22 +58,41 @@ def test_switch_context_switches_when_a_different_context_is_current(
 # --- resource lookup -----------------------------------------------------
 
 
-def test_resource_exists_returns_false_when_kubectl_reports_not_found(
+def test_resource_exists_is_false_when_kubectl_names_nothing(
     monkeypatch, recorder
 ):
-    rec = recorder(fail=True)
+    """--ignore-not-found reports absence as a zero exit with no output."""
+    rec = recorder(stdout="")
     monkeypatch.setattr(runtime_k8s, "execute_subprocess", rec)
 
     assert runtime_k8s.resource_exists("secret", "tls") is False
 
 
-def test_resource_exists_does_not_swallow_unexpected_failures(monkeypatch):
-    """Only a nonzero kubectl exit means "absent".
+def test_resource_exists_is_true_when_kubectl_names_the_resource(
+    monkeypatch, recorder
+):
+    rec = recorder(stdout="secret/tls\n")
+    monkeypatch.setattr(runtime_k8s, "execute_subprocess", rec)
 
-    An unreadable kubeconfig or a missing kubectl binary must surface, not be
-    reported as "the resource is not there" -- that answer would send helmo on
-    to create namespaces and secrets against a cluster it never reached.
+    assert runtime_k8s.resource_exists("secret", "tls") is True
+
+
+def test_resource_exists_raises_when_kubectl_fails(monkeypatch, recorder):
+    """A nonzero exit is a real failure, never an answer of "absent".
+
+    An unreachable cluster or a rejected credential reported as absence would
+    send the caller on to create namespaces and secrets against a cluster it
+    never reached.
     """
+    rec = recorder(fail=True)
+    monkeypatch.setattr(runtime_k8s, "execute_subprocess", rec)
+
+    with pytest.raises(HelmoRuntimeError):
+        runtime_k8s.resource_exists("secret", "tls")
+
+
+def test_resource_exists_does_not_swallow_unexpected_failures(monkeypatch):
+    """A missing kubectl binary must surface too, not read as absence."""
 
     def kubectl_is_missing(*args):
         raise FileNotFoundError("kubectl")
@@ -91,7 +111,12 @@ def test_resource_exists_omits_the_namespace_flag_when_no_namespace_given(
 
     runtime_k8s.resource_exists("namespace", "cert-manager")
 
-    assert rec.calls == [["kubectl", "get", "namespace", "cert-manager"]]
+    assert rec.calls == [
+        [
+            "kubectl", "get", "namespace", "cert-manager",
+            "--ignore-not-found", "-o", "name",
+        ]
+    ]
 
 
 def test_resource_exists_passes_the_namespace_flag_when_given(
@@ -103,7 +128,10 @@ def test_resource_exists_passes_the_namespace_flag_when_given(
     runtime_k8s.resource_exists("secret", "tls", namespace="cert-manager")
 
     assert rec.calls == [
-        ["kubectl", "get", "secret", "tls", "-n", "cert-manager"]
+        [
+            "kubectl", "get", "secret", "tls", "-n", "cert-manager",
+            "--ignore-not-found", "-o", "name",
+        ]
     ]
 
 
