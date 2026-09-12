@@ -1,5 +1,6 @@
 TODO
 *.mine
+*.ver.yaml
 # --- 1. Python Internals ---
 __pycache__/
 *.py[cod]
