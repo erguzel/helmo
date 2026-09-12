@@ -82,7 +82,8 @@ def suffix_exists(file: str|Path, *allowed_suffixes, ensure = False):
     suffix_accepted = suffix in allowed_suffixes and len(suffixes) == 1
     if not suffix_accepted:
         if ensure:
-            raise HelmoPathError(f"File {file_path} does not have expected suffix.",allowed_suffixes)
+            raise HelmoPathError(f"File {file_path} does not have expected suffix.")\
+                .add_data(allowed_suffixes=list(allowed_suffixes))
         return False
     return True
 

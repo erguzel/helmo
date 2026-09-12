@@ -3,7 +3,7 @@ import json
 
 class HelmoError(Exception):
     def __init__(self, *args):
-        self.message = ', '.join(args)
+        self.message = ', '.join(str(arg) for arg in args)
         self.data = {}
         super().__init__(*args)
     def add_data(self, **kwargs):
@@ -73,8 +73,8 @@ class HelmoError(Exception):
         except Exception:
             return str(obj)
 
-class HelmoValidationError(HelmoError):
-    pass
+class HelmoValidationError(HelmoError, ValueError):
+    """Also a ValueError so pydantic folds it into ValidationError."""
 
 class HelmoPathError(HelmoError):
     pass
