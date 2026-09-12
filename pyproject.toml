@@ -1,7 +1,7 @@
 [project]
 name = "helmo"
-version = "0.1.4"
-description = "Add your description here"
+version = "0.2.2"
+description = "Helm-kubernetes-registry managing cli tool."
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
@@ -10,6 +10,8 @@ authors = [
 requires-python = ">=3.12.1"
 dependencies = [
     "click==8.3.1",
+    "httpx>=0.28.1",
+    "kubernetes>=34.1.0",
     "loguru>=0.7.3",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",
@@ -18,7 +20,7 @@ dependencies = [
 ]
 
 [project.scripts]
-helmo = "helmo.main:cli"
+helmo = "helmo.cli:cli"
 
 [build-system]
 requires = ["uv_build>=0.9.21,<0.10.0"]
