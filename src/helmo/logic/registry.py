@@ -1,5 +1,6 @@
 
-import json,sys
+import json
+import sys
 from loguru import logger
 from helmo.api import RegistryClient
 
