@@ -1,0 +1,19 @@
+version: 2
+
+updates:
+  # ci.yml pins actions by commit SHA, which never picks up upstream fixes on
+  # its own -- Dependabot is what keeps those pins from silently ageing.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      # one pull request for routine bumps; majors still arrive on their own
+      python-dependencies:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
