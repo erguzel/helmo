@@ -21,7 +21,7 @@ def test_valid_init_file_parses_every_field(helmo_file):
     assert settings.CHART_NAME == "cert-manager"
     assert settings.CHART_VERSION == "v1.19.2"
     assert settings.NAMESPACE == "cert-manager"
-    assert settings.TEST_CONTEXT == "k3d-helmo-test"
+    assert settings.TEST_CONTEXT == "colima-helmo-test"
     assert settings.PROD_CONTEXT == "k3d-helmo-prod"
 
 
