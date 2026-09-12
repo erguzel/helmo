@@ -1,4 +1,5 @@
-import sys,shutil
+import shutil
+import sys
 import helmo.validate as validate
 from helmo.validate import HelmoReleasesYamlItemModel
 import helmo.runtime as runtime
@@ -174,7 +175,8 @@ def init_logic(init_file,suffix,env, quiet = False, dryrun=False):
         runtime.execute_subprocess(
             "kubectl","create", "namespace", NAMESPACE
         )
-        if not quiet:logger.info(f"Namespace {NAMESPACE} created in {context} context")
+        if not quiet:
+            logger.info(f"Namespace {NAMESPACE} created in {context} context")
     time_stamp = datetime.now().strftime("%Y%m%d%H%M%S")
     if dryrun:
         suffix = f"dryrun.{time_stamp}.{suffix}" if suffix else f"dryrun.{time_stamp}" 
@@ -192,7 +194,8 @@ def init_logic(init_file,suffix,env, quiet = False, dryrun=False):
         else:
             latest_file.write_text(helm_command_return.stdout)
     logger.info(f"Latest manifests of {release_name} versioned to {suffix} suffix.")
-    if not quiet: logger.info(f"Init {release_name} completed: {namespace_path}")
+    if not quiet:
+        logger.info(f"Init {release_name} completed: {namespace_path}")
 
 
 @logger.catch(onerror=lambda _: sys.exit(1))
