@@ -161,7 +161,7 @@ def uninstall(helmo_releases_yaml,dryrun,yes,deletenamespace,deployments):
 @click.option('--initfile','-i', required=True, help=ui.HelpMessages.INIT_FILE)
 @click.option(
     '--env', '-e',
-    type=click.Choice(['prod', 'staging', 'test'], case_sensitive=True),
+    type=click.Choice(['prod', 'test'], case_sensitive=True),
     required=True,
     help=ui.HelpMessages.ENVIRONMENT
 )
@@ -210,7 +210,7 @@ def init(init,env,suffix,quiet) TODO: Make env optional current context, add hel
 @click.option('--initfile','-i', required=True, help=ui.HelpMessages.INIT_FILE)
 @click.option(
     '--env', '-e',
-    type=click.Choice(['prod', 'staging', 'test'], case_sensitive=True),
+    type=click.Choice(['prod', 'test'], case_sensitive=True),
     required=True,
     help = ui.HelpMessages.ENVIRONMENT
 )

@@ -32,8 +32,9 @@ class HelmoReleasesYamlItemModel(BaseModel):
     # name: REQUIRED (Lowercase alphanumeric and dashes only for K8s)
     #name: str = Field(..., pattern=r"^[a-z0-9-]+$")
     initFile: str = Field(...)
-    # context: REQUIRED (only prod|staging|test)
-    environment: Literal["prod", "staging", "test"]
+    # environment: REQUIRED. Each value must have a matching <ENV>_CONTEXT
+    # field in the .helmo init file, so only prod and test are supported.
+    environment: Literal["prod", "test"]
     # secretNames: OPTIONAL (Defaults to empty list)
     secretFileNames: List[str] = []
     # resourceManifests: OPTIONAL but needs to be yaml/yml if provided

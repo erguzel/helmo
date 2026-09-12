@@ -10,7 +10,7 @@ def create_file_secret_logic(title,file,context='', namespace='',override=False)
 
     :param title: Secret name.
     :param file: Secret file.
-    :param environment: Environment prod|test|staging
+    :param environment: Environment prod|test
     :param namespace: Kubernetes namespace.
     :param override: Overrides existing secret.
     """

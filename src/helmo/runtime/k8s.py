@@ -12,7 +12,7 @@ def resource_apply(file,context=''):
     Applies a given resource yaml file to given environment
     
     :param file: Resource manifest yaml.
-    :param environment: Deploy environment prod|test|staging
+    :param environment: Deploy environment prod|test
     """
     #file = Path(file).resolve()
     #file_exists(file,ensure=True)
@@ -26,7 +26,7 @@ def switch_context(context):
     """
     Switches context according to given environment.
     
-    :param environment: Environment prod|test|staging
+    :param environment: Environment prod|test
     """
     cmd_res = execute_subprocess(
         "kubectl","config","current-context"
