@@ -48,7 +48,7 @@ class HelpMessages:
     HELM_VALUES = 'Additional values files to override main chart. Additional yaml files will apply to all given deployments. If there are conflicting fields in additional yamls, consider manual deployment for each release.'
     HELMO_SERIAL_RELEASES_YAML = 'HELMO_SERIAL_RELEASES_YAML file which defines multiple deployments. You do not need to give it if you set environment variable HELMO_SERIAL_RELEASES_YAML to absolute path of the file. Type helmo --defaults to see default file formats.'
     INIT_FILE = 'release-name.helmo init file of a deployment. See helmo --defaults for file formats.'
-    ENVIRONMENT = 'The target environment for the execution.'
+    ENVIRONMENT = 'The target environment for the execution: prod or test. It selects the matching <ENV>_CONTEXT entry of the .helmo init file.'
     WAIT = 'Wait timeout for deployed resources i.e. 10m, 5s etc. Default is 10s.'
     QUIET = 'Runs with minimal output.'
     REGISTRY_URL = 'Schemeless url of the registry like mydomain.myregistry.com. Default is the 1st entry machine name in ~/.netrc file'

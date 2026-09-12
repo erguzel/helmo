@@ -66,6 +66,14 @@ def test_release_item_rejects_an_unknown_environment():
         )
 
 
+def test_release_item_rejects_the_staging_environment():
+    """staging has no STAGING_CONTEXT counterpart in the .helmo init file."""
+    with pytest.raises(ValidationError):
+        HelmoReleasesYamlItemModel(
+            initFile="cert-manager.helmo", environment="staging"
+        )
+
+
 def test_release_item_defaults_optional_lists_to_empty():
     item = HelmoReleasesYamlItemModel(
         initFile="cert-manager.helmo", environment="prod"

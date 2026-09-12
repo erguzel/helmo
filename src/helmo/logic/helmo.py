@@ -75,7 +75,7 @@ def manual_deploy_logic(release_file,
     Logical function for manual helm deployment of a release.
 
     :param chart: .helm file of the chart.
-    :param env: Environment prod|staging|test.
+    :param env: Environment prod|test.
     :param action: Helm action install|upgrade|uninstall.
     :param wait: Wait timeout after helm command.
     :param quiet: Skips promopting to user.
