@@ -1,6 +1,9 @@
 #AGENTS
 .ai/eigencontext.md
 
+# Raw, unsanitised example material staged for review.
+examples-raw/
+
 TODO
 *.mine
 *.ver.yaml
