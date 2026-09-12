@@ -7,7 +7,7 @@ import helmo.ui as ui
 import helmo.logic.helmo as helm
 import helmo.logic.registry as docker
 import helmo.logic.k8s as k8s
-from helmo.validate import load_validated_netrc,ensure_file
+from helmo.validate import load_validated_netrc,ensure_file,HelmoError
 
 def setup_logging():
     logger.remove()
@@ -245,27 +245,46 @@ def create_file_secret(secrettitle,secretfile,context,namespace,override):
 #endregion CLI COMMANDS
 
 #region REGISTRY COMMANDS
+def registry_url_from_netrc():
+    """
+    Resolves the registry url from the first machine entry of ~/.netrc.
+
+    Click calls this only when --registryurl is given neither on the command
+    line nor through HELMO_REGISTRY_URL, and only after eager parameters have
+    been handled. Reading the file in the group callback instead made
+    'helmo registry <subcommand> --help' fail without a credential file,
+    because Click runs the group callback before it reaches the subcommand.
+    """
+    hint = ("Pass the url with --registryurl, set HELMO_REGISTRY_URL, "
+            "or put a machine entry in ~/.netrc.")
+    try:
+        netrc_entries = load_validated_netrc(ensure_file('~/.netrc'))
+    except HelmoError as e:
+        raise click.UsageError(f"Cannot read the registry url from ~/.netrc ({e}) {hint}") from e
+    if not netrc_entries:
+        raise click.UsageError(f"No machine entry found in ~/.netrc to use as the registry url. {hint}")
+    return netrc_entries[0].machine
+
+
+registry_url_option = click.option(
+    '--registryurl', '-u',
+    required=True,
+    envvar='HELMO_REGISTRY_URL',
+    default=registry_url_from_netrc,
+    help=ui.HelpMessages.REGISTRY_URL
+)
+
+
 @cli.group()
 @logger.catch(onerror=lambda _: sys.exit(1))
 def registry():
     """
-    Registry commands. Expects ~/.netrc file to make registry calls.
+    Registry commands. Reads the registry url from ~/.netrc unless it is given
+    with --registryurl or through HELMO_REGISTRY_URL.
     """
-    res_load_list = []
-    try:
-        res_load_list  = load_validated_netrc(ensure_file('~/.netrc'))
-    except (FileNotFoundError,ValueError) as e:
-        e.add_note(".netrc file must be in ~/ directory with correct format.")
-        raise e from e
-    os.environ["HELMO_REGISTRY_URL"] = res_load_list[0].machine
 
 @registry.command()
-@click.option(
-    '--registryurl', '-u',
-    required=True,
-    envvar='HELMO_REGISTRY_URL',
-    help=ui.HelpMessages.REGISTRY_URL
-)
+@registry_url_option
 def catalog(registryurl):
     """
     Lists remote images in the registry
@@ -275,12 +294,7 @@ def catalog(registryurl):
     click.secho(f"{catalog}",color='yellow')
 
 @registry.command()
-@click.option(
-    '--registryurl', '-u',
-    required=True,
-    envvar='HELMO_REGISTRY_URL',
-    help=ui.HelpMessages.REGISTRY_URL
-)
+@registry_url_option
 @click.argument('repo', nargs=-1,required=True)
 def tags(registryurl,repo):
     """
@@ -291,12 +305,7 @@ def tags(registryurl,repo):
     click.secho(f"{tags}",color='yellow')
 
 @registry.command()
-@click.option(
-    '--registryurl', '-u',
-    required=True,
-    envvar='HELMO_REGISTRY_URL',
-    help= ui.HelpMessages.REGISTRY_URL
-)
+@registry_url_option
 @click.option(
     '--repo', '-r',
     required=True,
@@ -313,12 +322,7 @@ def get_digest(registryurl,repo,tags):
     click.secho(f"{digest}",color='yellow')
 
 @registry.command()
-@click.option(
-    '--registryurl', '-u',
-    required=True,
-    envvar='HELMO_REGISTRY_URL',
-    help=ui.HelpMessages.REGISTRY_URL
-)
+@registry_url_option
 @click.option(
     '--repo', '-r',
     required=True,
@@ -342,12 +346,7 @@ def delete_digest(registryurl,repo,yes,digests):
     click.secho(f"{delete_message}",color='yellow')
 
 @registry.command()
-@click.option(
-    '--registryurl', '-u',
-    required=True,
-    envvar='HELMO_REGISTRY_URL',
-    help=ui.HelpMessages.REGISTRY_URL
-)
+@registry_url_option
 @click.option(
     '--repo', '-r',
     required=True,
@@ -372,12 +371,7 @@ def delete_tags(registryurl,repo,yes,tags):
     click.secho(f"{delete_message}",color='yellow')
 
 @registry.command()
-@click.option(
-    '--registryurl', '-u',
-    required=True,
-    envvar='HELMO_REGISTRY_URL',
-    help= ui.HelpMessages.REGISTRY_URL
-)
+@registry_url_option
 @click.option('--yes','-y', is_flag= True, help= ui.HelpMessages.YES)
 @click.argument('repos', nargs=-1,required=True)
 def delete_all(registryurl,repos,yes):
