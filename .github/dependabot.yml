@@ -17,3 +17,10 @@ updates:
       python-dependencies:
         patterns: ["*"]
         update-types: ["minor", "patch"]
+    ignore:
+      # kubernetes 36 pulls in aiohttp and a new transitive tree, and the client
+      # it changes is mocked end to end in the test suite -- a green CI run says
+      # nothing about it. Revisit once integration coverage can exercise
+      # gc_collect against a disposable cluster.
+      - dependency-name: "kubernetes"
+        update-types: ["version-update:semver-major"]
