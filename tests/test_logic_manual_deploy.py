@@ -36,7 +36,6 @@ def initialised_release(monkeypatch, recorder, helmo_file, tmp_path):
 def _patch_runtime(monkeypatch, recorder):
     rec = recorder(stdout=FAKE_CHART_VALUES)
     monkeypatch.setattr(runtime, "execute_subprocess", rec)
-    monkeypatch.setattr(runtime, "switch_context", lambda *a, **kw: None)
     monkeypatch.setattr(runtime, "resource_exists", lambda *a, **kw: True)
     return rec
 
@@ -97,6 +96,8 @@ def test_manual_uninstall_builds_a_helm_uninstall(
             "cert-manager",
             "-n",
             "cert-manager",
+            "--kube-context",
+            "colima-helmo-test",
             "--wait",
             "--timeout",
             "3m",
@@ -224,3 +225,47 @@ def test_manual_dry_run_uninstall_runs_no_helm_action(
     )
 
     assert _helm_calls(rec) == []
+
+
+def test_manual_names_the_context_on_the_helm_command(
+    monkeypatch, recorder, initialised_release
+):
+    """The environment picks a context, and the context rides on the command.
+
+    helmo used to run ``kubectl config use-context`` first, which rewrote the
+    user's global kubeconfig, was never restored, and left helm and kubectl
+    free to disagree about the target cluster.
+    """
+    rec = _patch_runtime(monkeypatch, recorder)
+
+    manual_deploy_logic(
+        release_file=initialised_release,
+        environment="test",
+        helm_action="install",
+        additional_values=[],
+        wait="2m",
+        quiet=True,
+    )
+
+    install = _helm_calls(rec)[-1]
+    assert ["--kube-context", "colima-helmo-test"] == install[
+        install.index("--kube-context") : install.index("--kube-context") + 2
+    ]
+    assert not [call for call in rec.calls if call[:2] == ["kubectl", "config"]]
+
+
+def test_manual_prod_environment_selects_the_prod_context(
+    monkeypatch, recorder, initialised_release
+):
+    rec = _patch_runtime(monkeypatch, recorder)
+
+    manual_deploy_logic(
+        release_file=initialised_release,
+        environment="prod",
+        helm_action="uninstall",
+        additional_values=[],
+        wait="2m",
+        quiet=True,
+    )
+
+    assert "k3d-helmo-prod" in _helm_calls(rec)[0]

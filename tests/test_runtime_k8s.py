@@ -1,9 +1,14 @@
 """Exactly what helmo would ask kubectl to do.
 
 These are the destructive paths -- creating and deleting secrets and
-namespaces, switching contexts.  Asserting the argv that *would* be executed
-covers them without ever pointing a real cluster at a delete command, which is
-the only way to test "it did not delete anything" safely.
+namespaces.  Asserting the argv that *would* be executed covers them without
+ever pointing a real cluster at a delete command, which is the only way to
+test "it did not delete anything" safely.
+
+The context is part of that argv.  helmo used to reach the right cluster by
+running ``kubectl config use-context``, which rewrites the user's global
+kubeconfig and was never restored; every command carries ``--context`` now, so
+the argv is the only place the target cluster is decided.
 """
 
 import pytest
@@ -22,37 +27,31 @@ def always_exists(monkeypatch):
     monkeypatch.setattr(runtime_k8s, "resource_exists", lambda *a, **kw: True)
 
 
-# --- context switching ---------------------------------------------------
+# --- the global kubeconfig is never touched -------------------------------
 
 
-def test_switch_context_is_a_noop_when_already_current(monkeypatch, recorder):
-    """kubectl terminates its output with a newline; the comparison must strip it.
+def test_no_command_rewrites_the_users_kubeconfig(monkeypatch, recorder, tmp_path):
+    """``kubectl config use-context`` must not appear anywhere.
 
-    Without stripping, the current context never compares equal and helmo
-    issues a redundant ``use-context`` on every single call.
+    It is a global mutation of a file helmo does not own, and helmo never put
+    it back.  It also made two commands out of one logical step, so a crash
+    between them left the user pointed at a cluster they did not choose.
     """
-    rec = recorder(stdout="k3d-helmo-test\n")
+    rec = recorder(stdout="secret/tls\n")
     monkeypatch.setattr(runtime_k8s, "execute_subprocess", rec)
+    manifest = tmp_path / "cluster-issuer.yaml"
+    manifest.write_text("{}")
 
-    runtime_k8s.switch_context("k3d-helmo-test")
+    runtime_k8s.resource_exists("secret", "tls", context="k3d-helmo-test")
+    runtime_k8s.resource_apply(str(manifest), context="k3d-helmo-test")
+    runtime_k8s.delete_namespace("cert-manager", context="k3d-helmo-test")
 
-    assert rec.calls == [["kubectl", "config", "current-context"]]
+    assert not [call for call in rec.calls if call[:2] == ["kubectl", "config"]]
 
 
-def test_switch_context_switches_when_a_different_context_is_current(
-    monkeypatch, recorder
-):
-    rec = recorder(stdout="some-other-cluster\n")
-    monkeypatch.setattr(runtime_k8s, "execute_subprocess", rec)
-
-    runtime_k8s.switch_context("k3d-helmo-test")
-
-    assert rec.calls[-1] == [
-        "kubectl",
-        "config",
-        "use-context",
-        "k3d-helmo-test",
-    ]
+def test_switch_context_is_gone():
+    """The helper is removed rather than kept as an unused side door."""
+    assert not hasattr(runtime_k8s, "switch_context")
 
 
 # --- resource lookup -----------------------------------------------------
@@ -114,6 +113,25 @@ def test_resource_exists_omits_the_namespace_flag_when_no_namespace_given(
     assert rec.calls == [
         [
             "kubectl", "get", "namespace", "cert-manager",
+            "--ignore-not-found", "-o", "name",
+        ]
+    ]
+
+
+def test_resource_exists_passes_the_context_flag_when_given(
+    monkeypatch, recorder
+):
+    rec = recorder()
+    monkeypatch.setattr(runtime_k8s, "execute_subprocess", rec)
+
+    runtime_k8s.resource_exists(
+        "namespace", "cert-manager", context="k3d-helmo-test"
+    )
+
+    assert rec.calls == [
+        [
+            "kubectl", "--context", "k3d-helmo-test",
+            "get", "namespace", "cert-manager",
             "--ignore-not-found", "-o", "name",
         ]
     ]
@@ -228,6 +246,24 @@ def test_create_file_secret_creates_a_missing_namespace(
     ]
 
 
+def test_create_file_secret_passes_the_context_to_every_command(
+    monkeypatch, recorder, tmp_path, never_exists
+):
+    """Namespace creation and secret creation must land in the same cluster."""
+    rec = recorder()
+    monkeypatch.setattr(runtime_k8s, "execute_subprocess", rec)
+    secret = tmp_path / "tls.crt"
+    secret.write_text("certificate")
+
+    runtime_k8s.create_file_secret(
+        "tls", secret, context="k3d-helmo-test", namespace="cert-manager"
+    )
+
+    assert rec.calls
+    for call in rec.calls:
+        assert call[:3] == ["kubectl", "--context", "k3d-helmo-test"]
+
+
 # --- namespace deletion --------------------------------------------------
 
 
@@ -251,7 +287,10 @@ def test_delete_namespace_deletes_when_present(
     runtime_k8s.delete_namespace("cert-manager", context="k3d-helmo-test")
 
     assert rec.calls == [
-        ["kubectl", "delete", "namespace", "cert-manager"]
+        [
+            "kubectl", "--context", "k3d-helmo-test",
+            "delete", "namespace", "cert-manager",
+        ]
     ]
 
 
@@ -269,23 +308,23 @@ def test_delete_namespace_ignores_an_empty_namespace(
 # --- manifest apply ------------------------------------------------------
 
 
-def test_resource_apply_switches_context_before_applying(
+def test_resource_apply_names_the_context_on_the_apply_itself(
     monkeypatch, recorder, tmp_path
 ):
-    rec = recorder(stdout="some-other-cluster\n")
+    """One command, one cluster: no separate switch step to get out of sync."""
+    rec = recorder()
     monkeypatch.setattr(runtime_k8s, "execute_subprocess", rec)
     manifest = tmp_path / "cluster-issuer.yaml"
     manifest.write_text("{}")
 
     runtime_k8s.resource_apply(str(manifest), context="k3d-helmo-test")
 
-    assert [
-        "kubectl",
-        "config",
-        "use-context",
-        "k3d-helmo-test",
-    ] in rec.calls
-    assert rec.calls[-1] == ["kubectl", "apply", "-f", str(manifest)]
+    assert rec.calls == [
+        [
+            "kubectl", "--context", "k3d-helmo-test",
+            "apply", "-f", str(manifest),
+        ]
+    ]
 
 
 def test_resource_apply_without_a_context_uses_the_current_one(

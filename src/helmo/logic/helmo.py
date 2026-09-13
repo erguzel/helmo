@@ -7,7 +7,7 @@ from helmo.validate.error import HelmoError
 from loguru import logger
 from datetime import datetime
 
-def build_helm_uninstall_command(release_name, namespace, wait):
+def build_helm_uninstall_command(release_name, namespace, wait, context=''):
     """
     Builds the argv of a helm uninstall.
 
@@ -19,17 +19,19 @@ def build_helm_uninstall_command(release_name, namespace, wait):
     :param release_name: Helm release name, taken from the .helmo file stem.
     :param namespace: Namespace the release lives in.
     :param wait: Timeout passed to helm --timeout.
+    :param context: Kubernetes context, passed as --kube-context. Empty means the current one.
     """
-    return [
+    command = [
         'helm',
         'uninstall',
         release_name,
         '-n',
-        namespace,
-        '--wait',
-        '--timeout',
-        f"{wait}"
+        namespace
     ]
+    if context:
+        command.extend(['--kube-context', context])
+    command.extend(['--wait', '--timeout', f"{wait}"])
+    return command
 
 
 @logger.catch(onerror=lambda _: sys.exit(1))
@@ -43,7 +45,8 @@ def uninstall_serial_deployment_release(deployment_release,delete_namespace=Fals
     helm_command_arr = build_helm_uninstall_command(
         release_name=release_name,
         namespace=HELMO_INIT_FILE.NAMESPACE,
-        wait='5m'
+        wait='5m',
+        context=context
     )
     logger.warning(f"HELM COMMAND in context {context}: \n" +
                 f"{helm_command_arr} \n" +
@@ -110,7 +113,6 @@ def manual_deploy_logic(release_file,
     CHART_VERSION=INIT_FILE_VARS.CHART_VERSION
     NAMESPACE=INIT_FILE_VARS.NAMESPACE
     context = getattr(INIT_FILE_VARS,f"{str(environment).upper()}_CONTEXT")
-    runtime.switch_context(context)
 
     if helm_action == 'uninstall':
         if additional_values:
@@ -118,7 +120,8 @@ def manual_deploy_logic(release_file,
         helm_command_arr = build_helm_uninstall_command(
             release_name=release_name,
             namespace=NAMESPACE,
-            wait=wait
+            wait=wait,
+            context=context
         )
     else:
         additional_values = [validate.ensure_file(val,'.yaml','.yml') for val in additional_values]
@@ -147,6 +150,8 @@ def manual_deploy_logic(release_file,
             f"{chart_values_file}"
         ]
 
+        if context:
+            helm_command_arr.extend(["--kube-context", context])
         helm_command_arr.extend(additional_values_files_cmd)
         helm_command_arr.extend(["--wait","--timeout",f"{wait}"])
         init_logic(init_file=release_file,suffix=suffix,env=environment,quiet=quiet,dryrun=dryrun)
@@ -221,7 +226,10 @@ def init_logic(init_file,suffix,env, quiet = False, dryrun=False):
         logger.warning(f"Release file {init_file} permanently overwrote {release_file_permanent}.")
     if not runtime.resource_exists("namespace",NAMESPACE,context):
         runtime.execute_subprocess(
-            "kubectl","create", "namespace", NAMESPACE
+            "kubectl",
+            "--context" if context else '',
+            context,
+            "create", "namespace", NAMESPACE
         )
         if not quiet:
             logger.info(f"Namespace {NAMESPACE} created in {context} context")
