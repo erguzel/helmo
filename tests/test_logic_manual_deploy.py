@@ -163,3 +163,64 @@ def test_manual_uninstall_needs_no_environment_manifest(
     )
 
     assert _helm_calls(rec)[0][:2] == ["helm", "uninstall"]
+
+
+def test_manual_dry_run_runs_no_helm_action(
+    monkeypatch, recorder, initialised_release
+):
+    """``manual -d`` used to reach the cluster through its init step.
+
+    The helm action itself was guarded, but ``init_logic`` was called
+    unguarded, so a dry run created the namespace and wrote a manifest set.
+    """
+    rec = _patch_runtime(monkeypatch, recorder)
+
+    manual_deploy_logic(
+        release_file=initialised_release,
+        environment="test",
+        helm_action="install",
+        additional_values=[],
+        wait="2m",
+        quiet=True,
+        dryrun=True,
+    )
+
+    assert not [call for call in rec.calls if call[:2] == ["helm", "install"]]
+    assert not [call for call in rec.calls if call[:2] == ["kubectl", "create"]]
+
+
+def test_manual_dry_run_writes_no_manifests(
+    monkeypatch, recorder, initialised_release
+):
+    _patch_runtime(monkeypatch, recorder)
+    before = sorted(path.name for path in initialised_release.parent.iterdir())
+
+    manual_deploy_logic(
+        release_file=initialised_release,
+        environment="test",
+        helm_action="install",
+        additional_values=[],
+        wait="2m",
+        quiet=True,
+        dryrun=True,
+    )
+
+    assert sorted(path.name for path in initialised_release.parent.iterdir()) == before
+
+
+def test_manual_dry_run_uninstall_runs_no_helm_action(
+    monkeypatch, recorder, initialised_release
+):
+    rec = _patch_runtime(monkeypatch, recorder)
+
+    manual_deploy_logic(
+        release_file=initialised_release,
+        environment="test",
+        helm_action="uninstall",
+        additional_values=[],
+        wait="2m",
+        quiet=True,
+        dryrun=True,
+    )
+
+    assert _helm_calls(rec) == []

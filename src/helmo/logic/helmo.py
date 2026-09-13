@@ -166,6 +166,7 @@ def init_logic(init_file,suffix,env, quiet = False, dryrun=False):
     
     :param helmo_file: release-name.helmo file of the release.
     :param suffix: Suffix for renaming previous yaml files for versioning. Default is '%Y%m%d%H%M%S"'.
+    :param dryrun: Reports what would be created, moved and written without touching anything.
     """
 
     init_file = validate.path_resolver(init_file)
@@ -191,11 +192,29 @@ def init_logic(init_file,suffix,env, quiet = False, dryrun=False):
         namespace_path = init_file.parent / NAMESPACE
     release_file_permanent = namespace_path / init_file.name
     config_path = namespace_path / "config" / release_name
-    config_path.mkdir(parents=True, exist_ok=True)
+    time_stamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    suffix = f"{time_stamp}.{suffix}" if suffix else f"{time_stamp}"
+    file_types=['prod','test','default']
 
-    #if not validate.file_exists(release_file_permanent):
-    #        namespace_path.mkdir(parents=True, exist_ok=True)
-    #if not validate.directory_exists(namespace_path):
+    if dryrun:
+        logger.warning(f"Dry run for {release_name}: nothing is created, moved or written.")
+        logger.warning(f"Would ensure directories {namespace_path} and {config_path}")
+        if release_file_permanent != init_file:
+            logger.warning(f"Would move release file {init_file} to {release_file_permanent}")
+        logger.warning(f"Would ensure namespace {NAMESPACE} in {context} context")
+        for ft in file_types:
+            latest_file=validate.path_resolver(namespace_path / f"{release_name}_{ft}_{CHART_VERSION}.yaml")
+            archived_file_name=validate.path_resolver(namespace_path / f"{release_name}_{ft}_{CHART_VERSION}_{suffix}.yaml")
+            if not validate.file_exists(latest_file):
+                logger.warning(f"Would write chart values to {latest_file}")
+            elif ft == "default":
+                logger.warning(f"Would refresh {latest_file} from the chart")
+            else:
+                logger.warning(f"Would archive {latest_file} as {archived_file_name}")
+        logger.warning(f"Dry run completed for {release_name}.")
+        return
+
+    config_path.mkdir(parents=True, exist_ok=True)
     namespace_path.mkdir(parents=True, exist_ok=True)
     if release_file_permanent != init_file:
         shutil.move(init_file,release_file_permanent)
@@ -206,12 +225,6 @@ def init_logic(init_file,suffix,env, quiet = False, dryrun=False):
         )
         if not quiet:
             logger.info(f"Namespace {NAMESPACE} created in {context} context")
-    time_stamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    if dryrun:
-        suffix = f"dryrun.{time_stamp}.{suffix}" if suffix else f"dryrun.{time_stamp}" 
-    else:
-        suffix = f"{time_stamp}.{suffix}" if suffix else f"{time_stamp}"
-    file_types=['prod','test','default']
     for ft in file_types:
         latest_file=validate.path_resolver(namespace_path / f"{release_name}_{ft}_{CHART_VERSION}.yaml")
         archived_file_name=validate.path_resolver(namespace_path / f"{release_name}_{ft}_{CHART_VERSION}_{suffix}.yaml")
