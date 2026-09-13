@@ -59,7 +59,7 @@ def install(helmo_releases_yaml,values,suffix,dryrun,yes,deployments):
     Installs given helm releases according to the information in serial-releases.yaml
     """
     action = 'install'
-    ui.serial_releases_file_ui_validate(helmo_releases_yaml,"HELMO_SERIAL_RELEASES_YAML file can not be null or empty. Either give it with -r option or set environment variable 'HELMO_SERIAL_RELEASES_YAML' with the absolute path of the file.")
+    ui.serial_releases_file_ui_validate(helmo_releases_yaml,"HELMO_SERIAL_RELEASES_YAML file can not be null or empty. Either give it with the -f option or set environment variable 'HELMO_SERIAL_RELEASES_YAML' with the absolute path of the file.")
     ui.file_extensions_ui_validate(helmo_releases_yaml,".yaml",".yml",message=f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} is not in expected format. Expected formats: yaml, .yml")
     ui.file_existence_ui_validate(helmo_releases_yaml,f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} does not exist.")
     ui.deployment_args_ui_validate(deployments,message=f"Paths or files are not accepted as release names {deployments}.")
@@ -101,7 +101,7 @@ def upgrade(helmo_releases_yaml,values,suffix,dryrun,yes,deployments):
     Upgrades given helm releases according to the information in serial-releases.yaml
     """
     action = 'upgrade'
-    ui.serial_releases_file_ui_validate(helmo_releases_yaml,"HELMO_SERIAL_RELEASES_YAML file can not be null or empty. Either give it with -r option or set environment variable 'HELMO_SERIAL_RELEASES_YAML' with the absolute path of the file.")
+    ui.serial_releases_file_ui_validate(helmo_releases_yaml,"HELMO_SERIAL_RELEASES_YAML file can not be null or empty. Either give it with the -f option or set environment variable 'HELMO_SERIAL_RELEASES_YAML' with the absolute path of the file.")
     ui.file_extensions_ui_validate(helmo_releases_yaml,".yaml",".yml",message=f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} is not in expected format. Expected formats: yaml, .yml")
     ui.file_existence_ui_validate(helmo_releases_yaml,f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} does not exist.")
     ui.deployment_args_ui_validate(deployments,message=f"Paths or files are not accepted as release names {deployments}.")
@@ -142,7 +142,7 @@ def uninstall(helmo_releases_yaml,dryrun,yes,deletenamespace,deployments):
     Uninstalls given deployment release names.
     """
     action = 'uninstall'
-    ui.serial_releases_file_ui_validate(helmo_releases_yaml,"HELMO_SERIAL_RELEASES_YAML file can not be null or empty. Either give it with -r option or set environment variable 'HELMO_SERIAL_RELEASES_YAML' with the absolute path of the file.")
+    ui.serial_releases_file_ui_validate(helmo_releases_yaml,"HELMO_SERIAL_RELEASES_YAML file can not be null or empty. Either give it with the -f option or set environment variable 'HELMO_SERIAL_RELEASES_YAML' with the absolute path of the file.")
     ui.file_extensions_ui_validate(helmo_releases_yaml,".yaml",".yml",message=f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} is not in expected format. Expected formats: yaml, .yml")
     ui.file_existence_ui_validate(helmo_releases_yaml,f"HELMO_SERIAL_RELEASES_YAML file {helmo_releases_yaml} does not exist.")
     ui.deployment_args_ui_validate(deployments,message=f"Paths or files are not accepted as release names {deployments}.")

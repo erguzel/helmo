@@ -34,7 +34,7 @@ def deployment_args_ui_validate(deployments,message=''):
         sys.exit(1)
 def serial_releases_file_ui_validate(releases, message=''):
     if not releases or releases == 'None':
-        message = message if message else "Helmo serial deployments yaml file can not be null or empty. Either give it with -r option or set environment variable 'HELMO_SERIAL_RELEASES_YAML' with the absolute path of the file."
+        message = message if message else "Helmo serial deployments yaml file can not be null or empty. Either give it with the -f option or set environment variable 'HELMO_SERIAL_RELEASES_YAML' with the absolute path of the file."
         click.secho(f"{Icons.FAILURE} {message}", fg="red", underline=False)
         sys.exit(1)
 
@@ -46,10 +46,10 @@ class HelpMessages:
     YES = 'Confirms all prompts.'
     HELM_ACTION = 'install, upgrade and uninstall are helm actions.'
     HELM_VALUES = 'Additional values files to override main chart. Additional yaml files will apply to all given deployments. If there are conflicting fields in additional yamls, consider manual deployment for each release.'
-    HELMO_SERIAL_RELEASES_YAML = 'HELMO_SERIAL_RELEASES_YAML file which defines multiple deployments. You do not need to give it if you set environment variable HELMO_SERIAL_RELEASES_YAML to absolute path of the file. Type helmo --defaults to see default file formats.'
-    INIT_FILE = 'release-name.helmo init file of a deployment. See helmo --defaults for file formats.'
+    HELMO_SERIAL_RELEASES_YAML = 'Yaml file defining multiple deployments. You do not need to give it if the environment variable HELMO_SERIAL_RELEASES_YAML holds the absolute path of the file. See examples/ for the format.'
+    INIT_FILE = 'release-name.helmo init file of a deployment. The release name is the file stem. See examples/ for the format.'
     ENVIRONMENT = 'The target environment for the execution: prod or test. It selects the matching <ENV>_CONTEXT entry of the .helmo init file.'
-    WAIT = 'Wait timeout for deployed resources i.e. 10m, 5s etc. Default is 10s.'
+    WAIT = 'Wait timeout passed to helm --timeout, i.e. 10m, 5s. Default is 2m for manual; serial uses 5m.'
     QUIET = 'Runs with minimal output.'
     REGISTRY_URL = 'Schemeless url of the registry like mydomain.myregistry.com. Default is the 1st entry machine name in ~/.netrc file'
     REGISTRY_REPO = 'Image-repository name in registry'
