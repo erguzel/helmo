@@ -1,0 +1,8 @@
+TEST_CONTEXT=colima-helmo-test
+PROD_CONTEXT=replace-with-your-prod-context
+CHART_VERSION=17.8.3
+APP_VERSION=1.38.2
+REPO_URL=https://weaviate.github.io/weaviate-helm
+REPOSITORY_NAME=weaviate
+CHART_NAME=weaviate
+NAMESPACE=weaviate

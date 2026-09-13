@@ -1,0 +1,27 @@
+# Two vector stores for a retrieval-augmented generation stack, each pinned to
+# its own chart version and installed into its own namespace.
+#
+# This is the small example: thirteen releases in examples/erpnext-test show
+# what a full stack looks like, two show what the file format is.  Add the
+# repositories once, then install both with a single command:
+#
+#   helm repo add qdrant https://qdrant.github.io/qdrant-helm
+#   helm repo add weaviate https://weaviate.github.io/weaviate-helm
+#   helm repo update
+#   helmo init -i qdrant/qdrant.helmo -e test
+#   helmo init -i weaviate/weaviate.helmo -e test
+#   helmo serial install -f releases.yaml qdrant weaviate
+#
+# init generates <release>_<env>_<chart-version>.yaml next to the .helmo file.
+# Edit the test manifest before installing; that file is the values.yaml helm
+# is handed, and a second init archives it rather than overwriting it.
+releases:
+  - initFile: qdrant/qdrant.helmo
+    environment: test
+    secretFileNames: []
+    resourceManifestNames: []
+
+  - initFile: weaviate/weaviate.helmo
+    environment: test
+    secretFileNames: []
+    resourceManifestNames: []
