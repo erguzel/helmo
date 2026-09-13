@@ -1,0 +1,8 @@
+TEST_CONTEXT=colima-helmo-test
+PROD_CONTEXT=replace-with-your-prod-context
+CHART_VERSION=1.19.1
+APP_VERSION=v1.19.1
+REPO_URL=https://qdrant.github.io/qdrant-helm
+REPOSITORY_NAME=qdrant
+CHART_NAME=qdrant
+NAMESPACE=qdrant
