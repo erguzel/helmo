@@ -80,6 +80,8 @@ def test_init_creates_the_namespace_when_it_is_missing(
 
     assert [
         "kubectl",
+        "--context",
+        "colima-helmo-test",
         "create",
         "namespace",
         "cert-manager",
