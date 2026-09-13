@@ -7,6 +7,31 @@ from helmo.validate.error import HelmoError
 from loguru import logger
 from datetime import datetime
 
+def build_helm_uninstall_command(release_name, namespace, wait):
+    """
+    Builds the argv of a helm uninstall.
+
+    helm uninstall takes neither a chart reference nor --values, --version or
+    --create-namespace, so it cannot share the argv of install and upgrade.
+    Both the serial and the manual path build it here, so the two cannot drift
+    apart again.
+
+    :param release_name: Helm release name, taken from the .helmo file stem.
+    :param namespace: Namespace the release lives in.
+    :param wait: Timeout passed to helm --timeout.
+    """
+    return [
+        'helm',
+        'uninstall',
+        release_name,
+        '-n',
+        namespace,
+        '--wait',
+        '--timeout',
+        f"{wait}"
+    ]
+
+
 @logger.catch(onerror=lambda _: sys.exit(1))
 def uninstall_serial_deployment_release(deployment_release,delete_namespace=False, dryrun=False):
     init_file = deployment_release.initFile
@@ -15,16 +40,11 @@ def uninstall_serial_deployment_release(deployment_release,delete_namespace=Fals
     context = getattr(HELMO_INIT_FILE,f"{str(deployment_release.environment).upper()}_CONTEXT")
     release_name = init_file.stem
     #
-    helm_command_arr=[
-        'helm',
-        'uninstall',
-        release_name,
-        '-n',
-        HELMO_INIT_FILE.NAMESPACE,
-        '--wait',
-        '--timeout',
-        '5m'
-    ]
+    helm_command_arr = build_helm_uninstall_command(
+        release_name=release_name,
+        namespace=HELMO_INIT_FILE.NAMESPACE,
+        wait='5m'
+    )
     logger.warning(f"HELM COMMAND in context {context}: \n" +
                 f"{helm_command_arr} \n" +
             "Wait till all resources uninstalled")
@@ -82,7 +102,6 @@ def manual_deploy_logic(release_file,
     :param values: Additional partial or complete values.yaml files to override original values.yaml manifest of release.
     """
     release_file = validate.ensure_file(release_file,'.helmo')
-    additional_values = [validate.ensure_file(val,'.yaml','.yml') for val in additional_values]
     release_name = release_file.stem
     deployment_root = release_file.parent
     INIT_FILE_VARS = validate.ensure_helmo_init_file_format(init_file=release_file) 
@@ -90,37 +109,47 @@ def manual_deploy_logic(release_file,
     CHART_NAME=INIT_FILE_VARS.CHART_NAME
     CHART_VERSION=INIT_FILE_VARS.CHART_VERSION
     NAMESPACE=INIT_FILE_VARS.NAMESPACE
-    chart_values_file= f"{deployment_root}/{release_name}_{environment}_{CHART_VERSION}.yaml"
-    if not validate.file_exists(chart_values_file):
-        logger.error(f"Values manifest file {chart_values_file} does not exist. Consider running 'helmo init -i {release_file}' first to generate manifest files to required directories")
-        sys.exit(1) 
-    
-    additional_values_files_cmd=[
-        item 
-        for af in additional_values 
-        for item in ("--values", str(validate.path_resolver(af)))
-    ]
-
-    helm_command_arr = [
-        "helm",
-        f"{helm_action}",
-        f"{release_name}",
-        f"{REPOSITORY_NAME}/{CHART_NAME}",
-        "--namespace",
-        f"{NAMESPACE}",
-        "--create-namespace",
-        "--version",
-        f"{CHART_VERSION}",
-        "--values",
-        f"{chart_values_file}"
-    ]
-
-    helm_command_arr.extend(additional_values_files_cmd)
-    helm_command_arr.extend(["--wait","--timeout",f"{wait}"])
     context = getattr(INIT_FILE_VARS,f"{str(environment).upper()}_CONTEXT")
     runtime.switch_context(context)
-    #k8s_switch_context(context)
-    init_logic(init_file=release_file,suffix=suffix,env=environment,quiet=quiet,dryrun=dryrun)
+
+    if helm_action == 'uninstall':
+        if additional_values:
+            logger.warning("helm uninstall takes no values files; the given ones are ignored.")
+        helm_command_arr = build_helm_uninstall_command(
+            release_name=release_name,
+            namespace=NAMESPACE,
+            wait=wait
+        )
+    else:
+        additional_values = [validate.ensure_file(val,'.yaml','.yml') for val in additional_values]
+        chart_values_file= f"{deployment_root}/{release_name}_{environment}_{CHART_VERSION}.yaml"
+        if not validate.file_exists(chart_values_file):
+            logger.error(f"Values manifest file {chart_values_file} does not exist. Consider running 'helmo init -i {release_file}' first to generate manifest files to required directories")
+            sys.exit(1) 
+
+        additional_values_files_cmd=[
+            item 
+            for af in additional_values 
+            for item in ("--values", str(validate.path_resolver(af)))
+        ]
+
+        helm_command_arr = [
+            "helm",
+            f"{helm_action}",
+            f"{release_name}",
+            f"{REPOSITORY_NAME}/{CHART_NAME}",
+            "--namespace",
+            f"{NAMESPACE}",
+            "--create-namespace",
+            "--version",
+            f"{CHART_VERSION}",
+            "--values",
+            f"{chart_values_file}"
+        ]
+
+        helm_command_arr.extend(additional_values_files_cmd)
+        helm_command_arr.extend(["--wait","--timeout",f"{wait}"])
+        init_logic(init_file=release_file,suffix=suffix,env=environment,quiet=quiet,dryrun=dryrun)
     logger.warning(f"HELM COMMAND in context {context}: \n" +
                 f"{helm_command_arr} \n" +
             f"Wait till all resources deployed for {wait}")
