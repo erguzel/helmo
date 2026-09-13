@@ -271,6 +271,11 @@ runs. The rest is not echoed: `helm show values` during `init`, and every
 `kubectl` call — namespace create and delete, `apply -f`, secret create and
 delete — carry the same `--context` but run silently.
 
+A failure prints its message, not an annotated traceback. `HELMO_DEBUG=1` turns
+loguru's full traceback back on; it annotates every frame with the values
+appearing in its source line, which on the registry path can include a
+`~/.netrc` credential, so keep it out of shared terminals and CI logs.
+
 ## Registry commands
 
 `helmo registry` talks to a Docker registry over HTTP. Credentials come from

@@ -3,6 +3,7 @@ import netrc
 import yaml
 from dotenv import load_dotenv
 from helmo.validate import RegistryAuthConfigModel, HelmoInitFileModel, NetrcEntryModel,HelmoReleasesYamlFileModel
+from helmo.validate.error import HelmoValidationError
 from pydantic import ValidationError
 
 def safe_load_helmo_releases_yaml_file(yaml_file)->HelmoReleasesYamlFileModel:
@@ -20,24 +21,43 @@ def releases_yaml_format_validate(yaml_content:dict):
         raise e
 
 def load_validated_netrc(path: str = "~/.netrc"):
+    """
+    Reads ~/.netrc and returns one validated entry per machine.
+
+    A parse error is re-raised without the original message. CPython quotes the
+    token it choked on in NetrcParseError, and in a malformed entry that token
+    is the password itself -- which would then reach stderr through the CLI's
+    error reporting. Only the file and the line number survive, and the cause is
+    suppressed so the traceback cannot print it either.
+
+    :param path: Path to the netrc file.
+    """
     try:
         raw_netrc = netrc.netrc(path)
-        validated_entries = []
-        for host, data in raw_netrc.hosts.items():
-            # netrc returns a tuple: (login, account, password)
-            entry = NetrcEntryModel(
+    except netrc.NetrcParseError as e:
+        raise HelmoValidationError(
+            f"Netrc file {path} could not be parsed at line {e.lineno}."
+        ).add_note(
+            "The offending token is withheld because it may be a password. "
+            "Inspect that line and retry."
+        ) from None
+    except FileNotFoundError as e:
+        raise HelmoValidationError(
+            f"Netrc file {path} does not exist."
+        ) from e
+
+    validated_entries = []
+    for host, data in raw_netrc.hosts.items():
+        # netrc returns a tuple: (login, account, password)
+        validated_entries.append(
+            NetrcEntryModel(
                 machine=host,
                 login=data[0],
                 account=data[1],
                 password=data[2]
             )
-            validated_entries.append(entry)
-        
-        return validated_entries
-
-    except (netrc.NetrcParseError, FileNotFoundError) as e:
-        e.add_note(f"Netrc file {path} does not exist or not in correct format. Inspect file and retry.")
-        raise e from e
+        )
+    return validated_entries
 
 def docker_auth_config_format_validate(json_content:RegistryAuthConfigModel):
     try:
