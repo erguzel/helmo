@@ -15,6 +15,9 @@ examples/**/*_default_*.yaml
 TODO
 *.mine
 *.ver.yaml
+
+# Sandbox run transcripts
+*.log
 # --- 1. Python Internals ---
 __pycache__/
 *.py[cod]
