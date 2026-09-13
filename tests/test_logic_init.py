@@ -135,19 +135,42 @@ def test_init_refreshes_the_default_manifest_from_the_chart(
     assert default_manifest.read_text() == FAKE_CHART_VALUES
 
 
-def test_init_marks_a_dry_run_in_the_archive_suffix(
+def test_init_dry_run_creates_nothing(
     monkeypatch, recorder, helmo_file, tmp_path
 ):
-    _patch_runtime(monkeypatch, recorder)
-    namespace_dir = tmp_path / "cert-manager"
+    """A dry run reports; it does not write.
 
-    init_logic(helmo_file, suffix="", env="test", quiet=True)
-    init_logic(
-        namespace_dir / "cert-manager.helmo",
-        suffix="",
-        env="test",
-        quiet=True,
-        dryrun=True,
-    )
+    It used to write a full manifest set and archive the previous one under a
+    ``dryrun.`` prefix, which left the caller to clean up after a command whose
+    point was to change nothing.
+    """
+    _patch_runtime(monkeypatch, recorder, namespace_present=False)
 
-    assert list(namespace_dir.glob("cert-manager_prod_v1.19.2_dryrun.*.yaml"))
+    init_logic(helmo_file, suffix="", env="test", quiet=True, dryrun=True)
+
+    assert helmo_file.exists(), "the release file must stay where it was"
+    assert not (tmp_path / "cert-manager").exists()
+    assert list(tmp_path.glob("*.yaml")) == []
+
+
+def test_init_dry_run_creates_no_namespace(
+    monkeypatch, recorder, helmo_file
+):
+    """No kubectl call may mutate the cluster during a dry run."""
+    rec = _patch_runtime(monkeypatch, recorder, namespace_present=False)
+
+    init_logic(helmo_file, suffix="", env="test", quiet=True, dryrun=True)
+
+    assert not [call for call in rec.calls if call[:2] == ["kubectl", "create"]]
+
+
+def test_init_dry_run_still_resolves_the_chart(
+    monkeypatch, recorder, helmo_file
+):
+    """Reading the chart values is the read-only part and stays: it proves the
+    pinned chart version resolves before a real run is attempted."""
+    rec = _patch_runtime(monkeypatch, recorder)
+
+    init_logic(helmo_file, suffix="", env="test", quiet=True, dryrun=True)
+
+    assert rec.calls[0][:3] == ["helm", "show", "values"]

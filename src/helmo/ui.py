@@ -42,7 +42,7 @@ def serial_releases_file_ui_validate(releases, message=''):
 
 class HelpMessages:
     SUFFIX = 'Suffix to version latest values manifests files along with a timestamp.'
-    DRYRUN = 'Performs dry run.'
+    DRYRUN = 'Reports what would be done without creating, writing or deleting anything.'
     YES = 'Confirms all prompts.'
     HELM_ACTION = 'install, upgrade and uninstall are helm actions.'
     HELM_VALUES = 'Additional values files to override main chart. Additional yaml files will apply to all given deployments. If there are conflicting fields in additional yamls, consider manual deployment for each release.'

@@ -216,14 +216,18 @@ def init(init,env,suffix,quiet) TODO: Make env optional current context, add hel
 )
 @click.option('--suffix','-s', default= '', help=ui.HelpMessages.SUFFIX)
 @click.option('--quiet','-q', is_flag= True, help=ui.HelpMessages.QUIET)
-def init(initfile,env,suffix,quiet):
+@click.option('--dryrun','-d', is_flag=True, default=False, help=ui.HelpMessages.DRYRUN)
+def init(initfile,env,suffix,quiet,dryrun):
     """
     A cli command for initializing release namespace folder with generated values yaml manifests and versions previous manifests.
     """
     ui.file_extensions_ui_validate(initfile,".helmo",message=f"Release file {initfile} is not in expected format. Expected: path/to/file-name.helmo")
     ui.file_existence_ui_validate(initfile, f"Release file {initfile} does not exist.")
-    helm.init_logic(initfile,suffix,env,quiet)
-    click.secho(f"{ui.Icons.SUCCESS} Namespace folder ready for {initfile} release.")
+    helm.init_logic(initfile,suffix,env,quiet,dryrun)
+    if dryrun:
+        click.secho(f"{ui.Icons.SUCCESS} Dry run completed for {initfile} release; nothing was changed.")
+    else:
+        click.secho(f"{ui.Icons.SUCCESS} Namespace folder ready for {initfile} release.")
 
 @cli.command()
 @click.option('--namespace','-n', required=False, default='', help=ui.HelpMessages.KUBERNETES_NAMESPACE)
