@@ -22,6 +22,9 @@ wrong cluster.
 - `helm` and `kubectl` on `PATH`
 - A kubeconfig with a context per environment
 
+Tested against Helm 4.2.4. Every flag it passes exists in Helm 3 as well, so it
+should work there too, but that is untested.
+
 ## Install
 
 ```
@@ -322,6 +325,13 @@ delete anything" without risking a delete.
 
 Integration tests are skipped unless `HELMO_TEST_CLUSTER` names a sandbox
 context (`colima-helmo-test`, `k3d-helmo-test`, `kind-helmo-test`).
+
+## Contributing
+
+I wrote helmo for quickly testing different releases in different
+configurations, and maintain it as I need it. Bug reports are welcome, but I
+don't have time to review pull requests, so if you need a change, a fork will
+get you there.
 
 ## License
 
