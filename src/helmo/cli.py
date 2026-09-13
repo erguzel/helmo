@@ -10,12 +10,22 @@ import helmo.logic.k8s as k8s
 from helmo.validate import load_validated_netrc,ensure_file,HelmoError
 
 def setup_logging():
+    """
+    Sends logs to stderr without loguru's annotated traceback.
+
+    backtrace and diagnose default to True, which annotates every frame of a
+    failure with the values appearing in its source line. On the registry path
+    those are netrc credentials, so the detail is opt-in: set HELMO_DEBUG to
+    get it back.
+    """
+    debug = os.environ.get("HELMO_DEBUG", "").strip().lower() in ("1", "true", "yes")
     logger.remove()
     logger.add(
         sys.stderr,
         format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <level>{message}</level>",
         colorize=True,
-        
+        backtrace=debug,
+        diagnose=debug,
     )
 
 #TODO:
