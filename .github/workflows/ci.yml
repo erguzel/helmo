@@ -52,5 +52,9 @@ jobs:
           uv export --locked --no-hashes --no-dev --no-emit-project
           --format requirements-txt -o requirements.txt
 
+      # --disable-pip is what keeps this job runnable: without it pip-audit
+      # resolves by building a venv, and the uv-managed CPython that
+      # setup-uv installs ships no ensurepip, so venv creation exits 127.
+      # --no-deps alone does not skip that step, it only makes --disable-pip legal.
       - name: Check against known advisories
-        run: uvx pip-audit -r requirements.txt --no-deps
+        run: uvx pip-audit -r requirements.txt --no-deps --disable-pip
