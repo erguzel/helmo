@@ -53,8 +53,14 @@ jobs:
           --format requirements-txt -o requirements.txt
 
       # --disable-pip is what keeps this job runnable: without it pip-audit
-      # resolves by building a venv, and the uv-managed CPython that
-      # setup-uv installs ships no ensurepip, so venv creation exits 127.
+      # resolves by building a venv from the uv-managed CPython that setup-uv
+      # installs, and creating that venv fails on the runner (exit 127).
       # --no-deps alone does not skip that step, it only makes --disable-pip legal.
+      # pip-audit is pinned because an unpinned tool in a weekly job breaks on
+      # a schedule nobody is watching; the advisory data is still fetched live,
+      # so pinning the tool does not stale the results.
+      # --strict turns a silently unaudited dependency into a failure.
       - name: Check against known advisories
-        run: uvx pip-audit -r requirements.txt --no-deps --disable-pip
+        run: >
+          uvx pip-audit@2.10.1 -r requirements.txt
+          --no-deps --disable-pip --strict
