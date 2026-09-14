@@ -17,7 +17,7 @@ wrong cluster.
 
 ## Requirements
 
-- Python 3.12.1 or newer
+- Python 3.12 or newer
 - [uv](https://docs.astral.sh/uv/)
 - `helm` and `kubectl` on `PATH`
 - A kubeconfig with a context per environment
