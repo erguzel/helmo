@@ -25,6 +25,7 @@ helmo = "helmo.cli:cli"
 [tool.uv]
 # transitive dependencies held at advisory-free floors
 constraint-dependencies = [
+    "anyio>=4.14.2",
     "idna>=3.15",
     "urllib3>=2.7.0",
 ]
